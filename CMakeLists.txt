@@ -76,6 +76,12 @@ FetchContent_Declare(
         GIT_TAG        v2.2.2
 )
 
+FetchContent_Declare(
+        prettyprint
+        GIT_REPOSITORY https://github.com/louisdx/cxx-prettyprint.git
+        GIT_TAG master
+)
+
 
 # Adds Catch2::Catch2.
 FetchContent_MakeAvailable(catch2)
@@ -86,6 +92,15 @@ if(NOT gflags_POPULATED)
     FetchContent_Populate(gflags)
     add_subdirectory(${gflags_SOURCE_DIR} ${gflags_BINARY_DIR})
 endif()
+
+# Adds cxx-prettyprint
+FetchContent_GetProperties(prettyprint)
+if (NOT prettyprint_POPULATED)
+    FetchContent_Populate(prettyprint)
+    # This is overkill since we only need a single file. Though it is a clean solution.
+    add_library(prettyprint INTERFACE)
+    target_include_directories(prettyprint INTERFACE ${prettyprint_SOURCE_DIR})
+endif ()
 
 # The executables are here.
 add_subdirectory(apps)

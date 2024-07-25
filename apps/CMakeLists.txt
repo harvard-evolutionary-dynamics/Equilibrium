@@ -1,5 +1,5 @@
 add_executable(run run.cc)
-target_link_libraries(run PRIVATE equilibrium gflags::gflags)
+target_link_libraries(run PRIVATE equilibrium gflags::gflags prettyprint OpenMP::OpenMP_CXX)
 
 # Cross-platform compiler lints
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"
