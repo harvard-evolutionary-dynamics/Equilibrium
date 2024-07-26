@@ -14,9 +14,9 @@ Stats Simulate(const SimulationConfig& config) {
   std::random_device rd;
   std::mt19937 rng(rd());
   std::uniform_int_distribution<> birther_dist(0, config.graph.N-1);
-  std::vector<std::uniform_int_distribution<>> dier_dists(config.graph.N);
+  std::vector<std::uniform_int_distribution<>> dier_idx_dists(config.graph.N);
   for (int i = 0; i < config.graph.N; ++i) {
-    dier_dists[i] = std::uniform_int_distribution<>(0, config.graph.adjacency_list[i].size()-1);
+    dier_idx_dists[i] = std::uniform_int_distribution<>(0, config.graph.adjacency_list[i].size()-1);
   }
   std::uniform_real_distribution<> birth_mutation_dist(0.0, 1.0);
 
@@ -27,7 +27,8 @@ Stats Simulate(const SimulationConfig& config) {
   for (int step = 0; step < config.num_steps; ++step) {
     // bd step.
     const auto birther = birther_dist(rng);
-    const auto dier = dier_dists[birther](rng);
+    const auto dier_idx = dier_idx_dists[birther](rng);
+    const auto dier = config.graph.adjacency_list[birther][dier_idx];
     location_to_type[dier] = location_to_type[birther];
 
     // Possibly mutate birth.
