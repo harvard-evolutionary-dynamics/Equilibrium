@@ -16,7 +16,7 @@ add_library(equilibrium ${SOURCE_LIST} ${HEADER_LIST})
 # We need this directory, and users of our library will need it too
 target_include_directories(equilibrium PUBLIC "${Equilibrium_SOURCE_DIR}/include/")
 
-target_link_libraries(equilibrium PRIVATE ${Python3_LIBRARIES} OpenMP::OpenMP_CXX nlohmann_json)
+target_link_libraries(equilibrium PRIVATE OpenMP::OpenMP_CXX nlohmann_json)
 
 # IDEs should put the headers in a nice place
 source_group(TREE "${PROJECT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${HEADER_LIST})

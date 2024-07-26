@@ -24,13 +24,6 @@ set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_EXTENSIONS OFF)
 # Make the output folder `cmake-build-debug`.
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY cmake-build-debug/)
-# Set the correct python version.
-find_package(Python3 COMPONENTS Interpreter Development)
-if(Python3_FOUND)
-    message("python3 found" ${Python3_STDLIB})
-else()
-    message(FATAL_ERROR "python3 not found :(")
-endif()
 # Use OpenMP.
 find_package(OpenMP)
 if (NOT OpenMP_CXX_FOUND)
