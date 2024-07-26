@@ -1,26 +1,24 @@
 #ifndef EQUILIBRIUM_SIMULATION_H_
 #define EQUILIBRIUM_SIMULATION_H_
 
-#include <vector>
+#include "graph.h"
 
 namespace equilibrium {
-
-struct Graph {
-  int N;
-  std::vector<std::vector<int>> adjacency_list;
-};
 
 struct Stats {
   int number_of_types;
 };
 
 struct SimulationConfig {
-  float birth_mutation_rate;
-  int steps;
+  double birth_mutation_rate;
+  int num_steps;
+  int num_simulations;
   Graph graph;
 };
 
 Stats Simulate(const SimulationConfig&);
+
+void ComputeDiversityCounts(const equilibrium::SimulationConfig&, std::map<int, int>*);
 
 int NumberOfTypes(const std::vector<int>);
 

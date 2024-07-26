@@ -1,43 +1,36 @@
 #include <iostream>
 #include <map>
+#include <stdexcept>
+#include <string>
 
-#include <omp.h>
+#include <equilibrium/graph.h>
 #include <equilibrium/simulation.h>
+#include <gflags/gflags.h>
+#include <omp.h>
 #include <prettyprint.hpp>
 
-equilibrium::Graph CompleteGraph(int N) {
-  equilibrium::Graph graph;
-  graph.N = N;
-  graph.adjacency_list.resize(N);
-  for (int i = 0; i < N; ++i) {
-    for (int j = 0; j < N; ++j) {
-      if (i != j) {
-        graph.adjacency_list[i].emplace_back(j);
-      }
-    }
-  }
-  return graph;
-}
+DEFINE_int32(N, 0, "N");
+DEFINE_int32(num_steps, 0, "num-steps");
+DEFINE_int32(num_simulations, 0, "num-simulations");
+DEFINE_double(birth_mutation_rate, 0, "birth-mutation-rate");
+DEFINE_string(graph_name, "complete", "graph-name");
+
 
 int main(int argc, char** argv) {
+  gflags::SetUsageMessage(
+      "Simulate birth-death process with multiple mutations");
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+
   equilibrium::SimulationConfig config;
-  config.birth_mutation_rate = 1e-4;
-  config.steps = 1e5;
-  config.graph = CompleteGraph(100);
+  config.birth_mutation_rate = FLAGS_birth_mutation_rate;
+  config.num_steps = FLAGS_num_steps;
+  config.num_simulations = FLAGS_num_simulations;
+
+  if (!GetGraph(FLAGS_graph_name, FLAGS_N, &config.graph)) {
+    throw std::invalid_argument("No graph named '" + FLAGS_graph_name + "'");
+  }
 
   std::map<int, int> diversity_counts;
-#pragma omp parallel for num_threads(32)
-  for (int trial = 0; trial < 1e3; ++trial) {
-    const auto stats = equilibrium::Simulate(config);
-
-#pragma omp critical
-    {
-      if (diversity_counts.find(stats.number_of_types) ==
-          diversity_counts.end()) {
-        diversity_counts[stats.number_of_types] = 0;
-      }
-      ++diversity_counts[stats.number_of_types];
-    }
-  }
+  ComputeDiversityCounts(config, &diversity_counts);
   std::cout << "Diversity counts: " << diversity_counts << std::endl;
 }

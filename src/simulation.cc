@@ -1,4 +1,5 @@
 #include <cassert>
+#include <map>
 #include <random>
 #include <set>
 
@@ -23,7 +24,7 @@ Stats Simulate(const SimulationConfig& config) {
   std::vector<int> location_to_type(config.graph.N, 0);
 
   // Evolve!
-  for (int step = 0; step < config.steps; ++step) {
+  for (int step = 0; step < config.num_steps; ++step) {
     // bd step.
     const auto birther = birther_dist(rng);
     const auto dier = dier_dists[birther](rng);
@@ -41,6 +42,24 @@ Stats Simulate(const SimulationConfig& config) {
   return stats;
 }
 
+void ComputeDiversityCounts(
+    const equilibrium::SimulationConfig& config,
+    std::map<int, int>* diversity_counts
+) {
+#pragma omp parallel for
+  for (int trial = 0; trial < config.num_simulations; ++trial) {
+    const auto stats = equilibrium::Simulate(config);
+
+#pragma omp critical
+    {
+      if (diversity_counts->find(stats.number_of_types) ==
+          diversity_counts->end()) {
+        (*diversity_counts)[stats.number_of_types] = 0;
+      }
+      ++(*diversity_counts)[stats.number_of_types];
+    }
+  }
+}
 
 int NumberOfTypes(const std::vector<int> location_to_type) {
   std::set<int> unique_elements(location_to_type.begin(), location_to_type.end());
