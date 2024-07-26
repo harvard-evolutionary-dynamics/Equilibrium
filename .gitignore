@@ -145,3 +145,4 @@ _deps
 dist/
 nlnum.egg-info/
 *.swp
+data/

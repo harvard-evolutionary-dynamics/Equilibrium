@@ -77,6 +77,13 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY git@github.com:nlohmann/json.git
+        GIT_TAG v3.11.3
+)
+
+
+FetchContent_Declare(
         prettyprint
         GIT_REPOSITORY https://github.com/louisdx/cxx-prettyprint.git
         GIT_TAG master
@@ -92,6 +99,16 @@ if(NOT gflags_POPULATED)
     FetchContent_Populate(gflags)
     add_subdirectory(${gflags_SOURCE_DIR} ${gflags_BINARY_DIR})
 endif()
+
+# Adds nlohmann_json
+FetchContent_GetProperties(nlohmann_json)
+if (NOT nlohmann_json_POPULATED)
+    FetchContent_Populate(nlohmann_json)
+    # This is overkill since we only need a single file. Though it is a clean solution.
+    add_library(nlohmann_json INTERFACE)
+    target_include_directories(nlohmann_json INTERFACE ${nlohmann_json_SOURCE_DIR}/include)
+endif ()
+
 
 # Adds cxx-prettyprint
 FetchContent_GetProperties(prettyprint)

@@ -44,7 +44,7 @@ Stats Simulate(const SimulationConfig& config) {
 
 void ComputeDiversityCounts(
     const equilibrium::SimulationConfig& config,
-    std::map<int, int>* diversity_counts
+    DiversityCounts* diversity_counts
 ) {
 #pragma omp parallel for
   for (int trial = 0; trial < config.num_simulations; ++trial) {

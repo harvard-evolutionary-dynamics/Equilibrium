@@ -8,6 +8,7 @@ namespace equilibrium {
 
 struct Graph {
   int N;
+  std::string name;
   std::vector<std::vector<int>> adjacency_list;
 };
 

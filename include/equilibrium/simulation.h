@@ -1,9 +1,15 @@
 #ifndef EQUILIBRIUM_SIMULATION_H_
 #define EQUILIBRIUM_SIMULATION_H_
 
+#include <map>
+#include <vector>
+
 #include "graph.h"
 
+
 namespace equilibrium {
+
+using DiversityCounts = std::map<int, int>;
 
 struct Stats {
   int number_of_types;
@@ -18,7 +24,7 @@ struct SimulationConfig {
 
 Stats Simulate(const SimulationConfig&);
 
-void ComputeDiversityCounts(const equilibrium::SimulationConfig&, std::map<int, int>*);
+void ComputeDiversityCounts(const equilibrium::SimulationConfig&, DiversityCounts*);
 
 int NumberOfTypes(const std::vector<int>);
 

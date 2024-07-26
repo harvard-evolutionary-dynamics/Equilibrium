@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <map>
 #include <stdexcept>
@@ -5,6 +6,7 @@
 
 #include <equilibrium/graph.h>
 #include <equilibrium/simulation.h>
+#include <equilibrium/writer.h>
 #include <gflags/gflags.h>
 #include <omp.h>
 #include <prettyprint.hpp>
@@ -17,6 +19,7 @@ DEFINE_string(graph_name, "complete", "graph-name");
 
 
 int main(int argc, char** argv) {
+
   gflags::SetUsageMessage(
       "Simulate birth-death process with multiple mutations");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
@@ -30,7 +33,17 @@ int main(int argc, char** argv) {
     throw std::invalid_argument("No graph named '" + FLAGS_graph_name + "'");
   }
 
-  std::map<int, int> diversity_counts;
+
+  equilibrium::MetaData metadata;
+  metadata.start_time = std::chrono::system_clock::now();
+
+  equilibrium::DiversityCounts diversity_counts;
   ComputeDiversityCounts(config, &diversity_counts);
   std::cout << "Diversity counts: " << diversity_counts << std::endl;
+
+  metadata.end_time = std::chrono::system_clock::now();
+
+  const std::string output_file_name = equilibrium::GetOutputFileName(metadata.start_time);
+  std::ofstream ofs{"data/" + output_file_name + ".json"};
+  equilibrium::WriteDiversityCountsToStream(diversity_counts, config, metadata, &ofs);
 }
