@@ -17,6 +17,7 @@ struct Stats {
 
 struct SimulationConfig {
   double birth_mutation_rate;
+  double independent_mutation_rate;
   int num_steps;
   int num_simulations;
   Graph graph;

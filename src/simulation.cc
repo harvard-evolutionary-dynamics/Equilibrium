@@ -19,6 +19,8 @@ Stats Simulate(const SimulationConfig& config) {
     dier_idx_dists[i] = std::uniform_int_distribution<>(0, config.graph.adjacency_list[i].size()-1);
   }
   std::uniform_real_distribution<> birth_mutation_dist(0.0, 1.0);
+  std::uniform_real_distribution<> independent_mutation_dist(0.0, 1.0);
+  std::uniform_int_distribution<> independent_mutation_location_dist(0, config.graph.N-1);
 
   int max_type = 0;
   std::vector<int> location_to_type(config.graph.N, 0);
@@ -34,6 +36,12 @@ Stats Simulate(const SimulationConfig& config) {
     // Possibly mutate birth.
     if (birth_mutation_dist(rng) < config.birth_mutation_rate) {
       location_to_type[dier] = ++max_type;
+    }
+
+    // Possibly independent mutation.
+    if (independent_mutation_dist(rng) < config.independent_mutation_rate) {
+      const auto mutated_location = independent_mutation_location_dist(rng);
+      location_to_type[mutated_location] = ++max_type;
     }
   }
 

@@ -15,6 +15,7 @@ DEFINE_int32(N, 0, "N");
 DEFINE_int32(num_steps, 0, "num-steps");
 DEFINE_int32(num_simulations, 0, "num-simulations");
 DEFINE_double(birth_mutation_rate, 0, "birth-mutation-rate");
+DEFINE_double(independent_mutation_rate, 0, "independent-mutation-rate");
 DEFINE_string(graph_name, "complete", "graph-name");
 
 
@@ -26,6 +27,7 @@ int main(int argc, char** argv) {
 
   equilibrium::SimulationConfig config;
   config.birth_mutation_rate = FLAGS_birth_mutation_rate;
+  config.independent_mutation_rate = FLAGS_independent_mutation_rate;
   config.num_steps = FLAGS_num_steps;
   config.num_simulations = FLAGS_num_simulations;
 
