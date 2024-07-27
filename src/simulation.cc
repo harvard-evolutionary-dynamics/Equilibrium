@@ -70,7 +70,7 @@ void ComputeDiversityCounts(
   }
 }
 
-int NumberOfTypes(const std::vector<int> location_to_type) {
+int NumberOfTypes(const std::vector<int>& location_to_type) {
   std::set<int> unique_elements(location_to_type.begin(), location_to_type.end());
   return unique_elements.size();
 }

@@ -27,7 +27,7 @@ Stats Simulate(const SimulationConfig&);
 
 void ComputeDiversityCounts(const equilibrium::SimulationConfig&, DiversityCounts*);
 
-int NumberOfTypes(const std::vector<int>);
+int NumberOfTypes(const std::vector<int>&);
 
 } // namespace equilibrium
 
