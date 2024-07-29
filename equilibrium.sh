@@ -1,5 +1,4 @@
 #!/bin/sh
-# set -xe
 #SBATCH -J Equilibrium
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=dbrewster@g.harvard.edu
