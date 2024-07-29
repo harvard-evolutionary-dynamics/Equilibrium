@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 
   equilibrium::DiversityCounts diversity_counts;
   ComputeDiversityCounts(config, &diversity_counts);
-  std::cout << "Diversity counts: " << diversity_counts << std::endl;
+  std::cout << "done" << std::endl;
 
   metadata.end_time = std::chrono::system_clock::now();
 

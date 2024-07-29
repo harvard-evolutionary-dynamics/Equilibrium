@@ -25,6 +25,50 @@ TEST_CASE("0 types", "[NumberOfTypes]") {
   REQUIRE(equilibrium::NumberOfTypes({}) == 0);
 }
 
+TEST_CASE("fully diverse", "[NumberOfUnmatchingPairs]") {
+  REQUIRE(equilibrium::NumberOfUnmatchingPairs({0, 1, 2}) == 3);
+}
+
+TEST_CASE("fully homogeneous", "[NumberOfUnmatchingPairs]") {
+  REQUIRE(equilibrium::NumberOfUnmatchingPairs({2, 2, 2}) == 0);
+}
+
+TEST_CASE("mixed population", "[NumberOfUnmatchingPairs]") {
+  REQUIRE(equilibrium::NumberOfUnmatchingPairs({2, 1, 2, 0, 2}) == 7);
+}
+
+TEST_CASE("N=1", "[NumberOfUnmatchingPairs]") {
+  REQUIRE(equilibrium::NumberOfUnmatchingPairs({2}) == 0);
+}
+
+TEST_CASE("fully diverse links", "[NumberOfUnmatchingLinks]") {
+  equilibrium::Graph graph;
+  graph.N = 3;
+  graph.adjacency_list = {{1}, {2, 0}, {1}};
+  REQUIRE(equilibrium::NumberOfUnmatchingLinks({0, 1, 2}, graph) == 2);
+}
+
+TEST_CASE("fully homogeneous links", "[NumberOfUnmatchingLinks]") {
+  equilibrium::Graph graph;
+  graph.N = 3;
+  graph.adjacency_list = {{1}, {2, 0}, {1}};
+  REQUIRE(equilibrium::NumberOfUnmatchingLinks({2, 2, 2}, graph) == 0);
+}
+
+TEST_CASE("mixed population links", "[NumberOfUnmatchingLinks]") {
+  equilibrium::Graph graph;
+  graph.N = 5;
+  graph.adjacency_list = {{1, 2, 3, 4}, {0, 2}, {0, 1, 3}, {0, 2}, {0}};
+  REQUIRE(equilibrium::NumberOfUnmatchingLinks({2, 1, 2, 0, 2}, graph) == 4);
+}
+
+TEST_CASE("N=1 links", "[NumberOfUnmatchingLinks]") {
+  equilibrium::Graph graph;
+  graph.N = 1;
+  graph.adjacency_list = {{}};
+  REQUIRE(equilibrium::NumberOfUnmatchingLinks({2}, graph) == 0);
+}
+
 TEST_CASE("star graph", "[StarGraph]") {
   const auto star = equilibrium::StarGraph(4);
   REQUIRE(star.N == 4);
@@ -97,4 +141,5 @@ TEST_CASE("double star N=5", "[DoubleStarGraph]") {
   std::vector<std::vector<int>> expected = {{1, 2, 4}, {0, 3}, {0}, {1}, {0}};
   REQUIRE(double_star.adjacency_list == expected);
 }
+
 

@@ -48,7 +48,16 @@ Stats Simulate(const SimulationConfig& config) {
   // Record stats.
   Stats stats;
   stats.number_of_types = NumberOfTypes(location_to_type);
+  stats.number_of_unmatching_pairs = NumberOfUnmatchingPairs(location_to_type);
+  stats.number_of_unmatching_links = NumberOfUnmatchingLinks(location_to_type, config.graph);
   return stats;
+}
+
+int GetMeasureResult(const Stats& stats, const DiversityMeasure& measure) {
+  if (measure == DiversityMeasure::NUMBER_OF_TYPES) return stats.number_of_types;
+  if (measure == DiversityMeasure::NUMBER_OF_UNMATCHING_PAIRS) return stats.number_of_unmatching_pairs;
+  if (measure == DiversityMeasure::NUMBER_OF_UNMATCHING_LINKS) return stats.number_of_unmatching_links;
+  return -1;
 }
 
 void ComputeDiversityCounts(
@@ -61,11 +70,9 @@ void ComputeDiversityCounts(
 
 #pragma omp critical
     {
-      if (diversity_counts->find(stats.number_of_types) ==
-          diversity_counts->end()) {
-        (*diversity_counts)[stats.number_of_types] = 0;
+      for (const auto& measure : DIVERSITY_MEASURES) {
+        ++(*diversity_counts)[measure][GetMeasureResult(stats, measure)];
       }
-      ++(*diversity_counts)[stats.number_of_types];
     }
   }
 }
@@ -73,6 +80,50 @@ void ComputeDiversityCounts(
 int NumberOfTypes(const std::vector<int>& location_to_type) {
   std::set<int> unique_elements(location_to_type.begin(), location_to_type.end());
   return unique_elements.size();
+}
+
+int NumberOfUnmatchingPairs(const std::vector<int>& location_to_type) {
+  // Note: this assumes the graph is undirected.
+  int num = 0;
+  for (int i = 0; i < location_to_type.size(); ++i) {
+    for (int j = i+1; j < location_to_type.size(); ++j) {
+      if (location_to_type[i] != location_to_type[j]) {
+        ++num;
+      }
+    }
+  }
+
+  return num;
+}
+
+int NumberOfUnmatchingLinks(const std::vector<int>& location_to_type, const Graph& graph) {
+  // Note: this assumes the graph is undirected.
+  int num = 0;
+  for (int i = 0; i < graph.N; ++i) {
+    for (const auto& j : graph.adjacency_list[i]) {
+      if ((i < j) && (location_to_type[i] != location_to_type[j])) {
+        ++num;
+      }
+    }
+  }
+
+  return num;
+}
+
+bool ToString(const DiversityMeasure& measure, std::string* output) {
+  if (measure == DiversityMeasure::NUMBER_OF_TYPES) {
+    *output = "number_of_types";
+    return true;
+  }
+  if (measure == DiversityMeasure::NUMBER_OF_UNMATCHING_PAIRS) {
+    *output = "number_of_unmatching_pairs";
+    return true;
+  }
+  if (measure == DiversityMeasure::NUMBER_OF_UNMATCHING_LINKS) {
+    *output = "number_of_unmatching_links";
+    return true;
+  }
+  return false;
 }
 
 }  // namespace equilibrium

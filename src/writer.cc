@@ -38,10 +38,10 @@ std::string GetOutputFileName(const std::chrono::time_point<std::chrono::system_
 }
 
 void WriteDiversityCountsToStream(
-        const DiversityCounts& diversity_counts,
-        const SimulationConfig& config,
-        const MetaData& metadata,
-        std::ostream* os
+  const DiversityCounts& diversity_counts,
+  const SimulationConfig& config,
+  const MetaData& metadata,
+  std::ostream* os
 ) {
   nlohmann::json j;
   auto& config_json = j["config"];
@@ -57,13 +57,24 @@ void WriteDiversityCountsToStream(
   metadata_json["end_time_s"] = GetSeconds(metadata.end_time);
 
   auto& results_json = j["results"];
-  auto& dc_json  = results_json["diversity_counts"];
-  for (const auto& element : diversity_counts) {
-    nlohmann::json single_diversity_count_json;
-    single_diversity_count_json["diversity"] = element.first;
-    single_diversity_count_json["count"] = element.second;
+  for (const auto& measure_counts : diversity_counts) {
+    nlohmann::json diversity_count_json;
 
-    dc_json.emplace_back(single_diversity_count_json);
+    std::string diversity_measure;
+    if (!ToString(measure_counts.first, &diversity_measure)) {
+      diversity_measure = "unknown";
+    }
+    diversity_count_json["diversity_measure"] = diversity_measure;
+
+    auto& dc_json  = diversity_count_json["diversity_counts"];
+    for (const auto& element : measure_counts.second) {
+      nlohmann::json count_json;
+      count_json["diversity"] = element.first;
+      count_json["count"] = element.second;
+      dc_json.emplace_back(count_json);
+    }
+
+    results_json.emplace_back(diversity_count_json);
   }
 
   (*os) << j.dump(2);
