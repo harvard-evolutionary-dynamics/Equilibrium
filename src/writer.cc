@@ -61,6 +61,7 @@ void WriteDiversityCountsToStream(
   auto& metadata_json = j["metadata"];
   metadata_json["start_time_s"] = GetSeconds(metadata.start_time);
   metadata_json["end_time_s"] = GetSeconds(metadata.end_time);
+  metadata_json["tag"] = metadata.tag;
 
   auto& results_json = j["results"];
   for (const auto& measure_counts : diversity_counts) {

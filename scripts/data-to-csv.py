@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import csv
 import json
 import time
@@ -9,15 +10,18 @@ from pathlib import Path
 RAW_DATA_FOLDER = 'data/'
 PROCESSED_DATA_FOLDER = 'processed-data/'
 
-def main():
+def main(args: argparse.Namespace):
   data = []
   for run_path in Path(RAW_DATA_FOLDER).glob('*.json'):
     with run_path.open('r') as f:
       run = json.load(f)
 
-    config = run['config']
     metadata = run['metadata']
+    if metadata.get("tag") != args.tag: continue
+
+    config = run['config']
     results = run['results']
+
     for dc in results['diversity_counts']:
       datum = {**config, **metadata, **dc}
       data.append(datum)
@@ -43,5 +47,8 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--tag", type=str, required=True)
+  args = parser.parse_args()
+  main(args)
 

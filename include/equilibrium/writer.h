@@ -12,6 +12,7 @@ namespace equilibrium {
 struct MetaData {
   std::chrono::time_point<std::chrono::system_clock> start_time;
   std::chrono::time_point<std::chrono::system_clock> end_time;
+  std::string tag;
 };
 
 std::string GetOutputFileName();

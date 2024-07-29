@@ -18,6 +18,7 @@ DEFINE_double(birth_mutation_rate, 0, "birth-mutation-rate");
 DEFINE_double(independent_mutation_rate, 0, "independent-mutation-rate");
 DEFINE_string(graph_name, "complete", "graph-name");
 DEFINE_string(dynamic, "birth-death", "dynamic");
+DEFINE_string(tag, "", "tag");
 
 
 int main(int argc, char** argv) {
@@ -42,6 +43,7 @@ int main(int argc, char** argv) {
 
 
   equilibrium::MetaData metadata;
+  metadata.tag = FLAGS_tag;
   metadata.start_time = std::chrono::system_clock::now();
 
   equilibrium::DiversityCounts diversity_counts;
