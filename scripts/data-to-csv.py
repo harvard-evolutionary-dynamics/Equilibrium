@@ -22,28 +22,31 @@ def main(args: argparse.Namespace):
     config = run['config']
     results = run['results']
 
-    for dc in results['diversity_counts']:
-      datum = {**config, **metadata, **dc}
-      data.append(datum)
+    for result in results:
+      for dc in result['diversity_counts']:
+        datum = {**config, **metadata, **dc, **{'diversity_measure': result['diversity_measure']}}
+        data.append(datum)
 
   now = int(time.time())
   with Path(f'{PROCESSED_DATA_FOLDER}/collated-result-{now}.csv').open('w') as f:
     writer = csv.DictWriter(f, fieldnames=[
-      'N',
-      'graph_name',
-      'birth_mutation_rate',
-      'independent_mutation_rate',
-      'num_simulations',
-      'num_steps',
+      'tag',
       'start_time_s',
       'end_time_s',
+      'N',
+      'graph_name',
+      'num_simulations',
+      'num_steps',
+      'birth_mutation_rate',
+      'independent_mutation_rate',
+      'diversity_measure',
+      'dynamic',
       'diversity',
       'count',
     ])
     writer.writeheader()
     for row in data:
       writer.writerow(row)
-
 
 
 if __name__ == '__main__':

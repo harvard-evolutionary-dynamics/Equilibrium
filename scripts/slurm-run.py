@@ -17,17 +17,19 @@ def create_temp_script(options: ScriptOptions):
   temp_file = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.sh')
   temp_file.write(
     f"""
-    OMP_NUM_THREADS=100 \
-      ./cmake-build-release/apps/cmake-build-debug/run \
-      --N=100 \
-      --birth-mutation-rate={options.birth_mutation_rate} \
-      --independent-mutation-rate={options.independent_mutation_rate} \
-      --num-steps=10000000 \
-      --graph-name={options.graph_name} \
-      --num-simulations=10000 \
-      --dynamic={options.dynamic}
+#!/bin/sh
+OMP_NUM_THREADS=100 \
+  ./cmake-build-release/apps/cmake-build-debug/run \
+  --N=100 \
+  --birth-mutation-rate={options.birth_mutation_rate} \
+  --independent-mutation-rate={options.independent_mutation_rate} \
+  --num-steps=10000000 \
+  --graph-name={options.graph_name} \
+  --num-simulations=10000 \
+  --dynamic={options.dynamic} \
+  --tag=v1.0.0
 
-    """
+    """.strip()
   )
   temp_file.close()
   return temp_file.name
@@ -62,17 +64,14 @@ def main():
       dynamic=dynamic,
     )
     submit_job(script_options=options, sbatch_args=[
-      '-J Equilibrium',
+      '-J=Equilibrium',
       '--mail-type=ALL',
       '--mail-user=dbrewster@g.harvard.edu',
       '--mem-per-cpu=2G',
-      '-t 0-72:00:00',
+      '--time=0-72:00:00',
       '--ntasks=100',
       '--output=./slurm/%j.out',
     ])
-
-    # Only submit one to start.
-    break
 
 
 if __name__ == '__main__':
