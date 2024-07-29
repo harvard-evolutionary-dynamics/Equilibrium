@@ -17,6 +17,7 @@ DEFINE_int32(num_simulations, 0, "num-simulations");
 DEFINE_double(birth_mutation_rate, 0, "birth-mutation-rate");
 DEFINE_double(independent_mutation_rate, 0, "independent-mutation-rate");
 DEFINE_string(graph_name, "complete", "graph-name");
+DEFINE_string(dynamic, "birth-death", "dynamic");
 
 
 int main(int argc, char** argv) {
@@ -33,6 +34,10 @@ int main(int argc, char** argv) {
 
   if (!GetGraph(FLAGS_graph_name, FLAGS_N, &config.graph)) {
     throw std::invalid_argument("No graph named '" + FLAGS_graph_name + "'");
+  }
+
+  if (!FromString(FLAGS_dynamic, &config.dynamic)) {
+    throw std::invalid_argument("No dynamic named '" + FLAGS_dynamic + "'");
   }
 
 

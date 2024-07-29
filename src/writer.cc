@@ -52,6 +52,12 @@ void WriteDiversityCountsToStream(
   config_json["num_steps"] = config.num_steps;
   config_json["num_simulations"] = config.num_simulations;
 
+  std::string dynamic_str;
+  if (!ToString(config.dynamic, &dynamic_str)) {
+    dynamic_str = "unknown";
+  }
+  config_json["dynamic"] = dynamic_str;
+
   auto& metadata_json = j["metadata"];
   metadata_json["start_time_s"] = GetSeconds(metadata.start_time);
   metadata_json["end_time_s"] = GetSeconds(metadata.end_time);

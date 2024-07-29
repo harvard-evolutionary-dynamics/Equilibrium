@@ -25,6 +25,8 @@ Graph CycleGraph(int N);
 
 bool GetGraph(const std::string& graph_name, int N, Graph* graph);
 
+bool IsUndirected(const Graph&);
+
 } // namespace equilibrium
 
 #endif // EQUILIBRIUM_GRAPH_H_

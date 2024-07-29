@@ -7,35 +7,79 @@
 
 namespace equilibrium {
 
+StepConfig::StepConfig(
+    const Dynamic& dynamic,
+    const Graph& graph,
+    std::uniform_int_distribution<>& first_step_dist,
+    std::vector<std::uniform_int_distribution<>>& second_step_idx_dists,
+    std::mt19937& rng
+) : dynamic(dynamic),
+    graph(graph),
+    first_step_dist(first_step_dist),
+    second_step_idx_dists(second_step_idx_dists), rng(rng) {}
+
+void BirthDeathStep(const StepConfig& step_config, Step* step) {
+  // bd step.
+  step->birther = step_config.first_step_dist(step_config.rng);
+  const auto dier_idx = step_config.second_step_idx_dists[step->birther](step_config.rng);
+  step->dier = step_config.graph.adjacency_list[step->birther][dier_idx];
+}
+
+void DeathBirthStep(const StepConfig& step_config, Step* step) {
+  // db step.
+  // Note: assumes the graph is undirected.
+  step->dier = step_config.first_step_dist(step_config.rng);
+  const auto birther_idx = step_config.second_step_idx_dists[step->dier](step_config.rng);
+  step->birther = step_config.graph.adjacency_list[step->dier][birther_idx];
+}
+
+bool MakeStep(const StepConfig& step_config, Step* step) {
+  if (step_config.dynamic == Dynamic::BIRTH_DEATH) {
+    BirthDeathStep(step_config, step);
+    return true;
+  }
+  if (step_config.dynamic == Dynamic::DEATH_BIRTH) {
+    DeathBirthStep(step_config, step);
+    return true;
+  }
+  return false;
+}
+
+
 Stats Simulate(const SimulationConfig& config) {
   assert(config.graph.adjacency_list.size() == config.graph.N);
+  assert(IsUndirected(config.graph));
 
   // Initialize distributions.
   std::random_device rd;
   std::mt19937 rng(rd());
-  std::uniform_int_distribution<> birther_dist(0, config.graph.N-1);
-  std::vector<std::uniform_int_distribution<>> dier_idx_dists(config.graph.N);
+  std::uniform_int_distribution<> first_step_dist(0, config.graph.N-1);
+  std::vector<std::uniform_int_distribution<>> second_step_idx_dists(config.graph.N);
   for (int i = 0; i < config.graph.N; ++i) {
-    dier_idx_dists[i] = std::uniform_int_distribution<>(0, config.graph.adjacency_list[i].size()-1);
+    second_step_idx_dists[i] = std::uniform_int_distribution<>(0, config.graph.adjacency_list[i].size()-1);
   }
   std::uniform_real_distribution<> birth_mutation_dist(0.0, 1.0);
   std::uniform_real_distribution<> independent_mutation_dist(0.0, 1.0);
   std::uniform_int_distribution<> independent_mutation_location_dist(0, config.graph.N-1);
 
+  // Configure the step options.
+  StepConfig step_config(config.dynamic, config.graph, first_step_dist, second_step_idx_dists, rng);
+  Step step;
+
   int max_type = 0;
   std::vector<int> location_to_type(config.graph.N, 0);
 
   // Evolve!
-  for (int step = 0; step < config.num_steps; ++step) {
-    // bd step.
-    const auto birther = birther_dist(rng);
-    const auto dier_idx = dier_idx_dists[birther](rng);
-    const auto dier = config.graph.adjacency_list[birther][dier_idx];
-    location_to_type[dier] = location_to_type[birther];
+  for (int step_num = 0; step_num < config.num_steps; ++step_num) {
+    if (!MakeStep(step_config, &step)) {
+      throw std::invalid_argument("Could not find matching dynamic for step");
+    }
+
+    location_to_type[step.dier] = location_to_type[step.birther];
 
     // Possibly mutate birth.
     if (birth_mutation_dist(rng) < config.birth_mutation_rate) {
-      location_to_type[dier] = ++max_type;
+      location_to_type[step.dier] = ++max_type;
     }
 
     // Possibly independent mutation.
@@ -123,6 +167,32 @@ bool ToString(const DiversityMeasure& measure, std::string* output) {
     *output = "number_of_unmatching_links";
     return true;
   }
+  return false;
+}
+
+bool FromString(const std::string& dynamic_str, Dynamic* dynamic) {
+  if (dynamic_str == "birth-death") {
+    *dynamic = Dynamic::BIRTH_DEATH;
+    return true;
+  }
+  if (dynamic_str == "death-birth") {
+    *dynamic = Dynamic::DEATH_BIRTH;
+    return true;
+  }
+
+  return false;
+}
+
+bool ToString(const Dynamic& dynamic, std::string* dynamic_str) {
+  if (dynamic == Dynamic::BIRTH_DEATH) {
+    *dynamic_str = "birth-death";
+    return true;
+  }
+  if (dynamic == Dynamic::DEATH_BIRTH) {
+    *dynamic_str = "death-birth";
+    return true;
+  }
+
   return false;
 }
 

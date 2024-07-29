@@ -142,4 +142,18 @@ TEST_CASE("double star N=5", "[DoubleStarGraph]") {
   REQUIRE(double_star.adjacency_list == expected);
 }
 
+TEST_CASE("undirected graph", "[IsUndirected]") {
+  equilibrium::Graph graph;
+  graph.N = 4;
+  graph.adjacency_list = {{1}, {0, 2, 3}, {1, 3}, {1, 2}};
+  REQUIRE(equilibrium::IsUndirected(graph));
+}
+
+TEST_CASE("directed graph", "[IsUndirected]") {
+  equilibrium::Graph graph;
+  graph.N = 4;
+  graph.adjacency_list = {{1}, {2, 3}, {1, 3}, {1, 2}};
+  REQUIRE(!equilibrium::IsUndirected(graph));
+}
+
 

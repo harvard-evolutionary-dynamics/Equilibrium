@@ -1,4 +1,6 @@
+#include <set>
 #include <string>
+#include <utility>
 
 #include <equilibrium/graph.h>
 
@@ -96,6 +98,24 @@ bool GetGraph(const std::string& graph_name, int N, Graph* graph) {
     return true;
   }
   return false;
+}
+
+bool IsUndirected(const Graph& graph) {
+  std::set<std::pair<int, int>> edges;
+  for (int i = 0; i < graph.N; ++i) {
+    for (const auto& j: graph.adjacency_list[i]) {
+      edges.insert({i, j});
+    }
+  }
+
+  for (const auto& edge : edges) {
+    // We should be able to find the reverse pair.
+    if (edges.find({edge.second, edge.first}) == edges.end()) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 }  // namespace equilibrium
