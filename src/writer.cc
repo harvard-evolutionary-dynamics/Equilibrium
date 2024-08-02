@@ -53,6 +53,7 @@ void WriteSimulationHistoryToStream(
   config_json["independent_mutation_rate"] = config.independent_mutation_rate;
   config_json["N"] = config.graph.N;
   config_json["num_steps"] = config.num_steps;
+  config_json["sample_rate"] = config.history_sample_rate;
 
   std::string dynamic_str;
   if (!ToString(config.dynamic, &dynamic_str)) {
@@ -66,10 +67,9 @@ void WriteSimulationHistoryToStream(
   metadata_json["tag"] = metadata.tag;
 
   auto& simulation_history_json = j["simulation_history"];
-  assert(config.num_steps+1 == history.location_to_types.size());
-  for (int step_num = 0; step_num <= config.num_steps; ++step_num) {
+  for (int step_num = 0; step_num < history.location_to_types.size(); ++step_num) {
     nlohmann::json time_slice;
-    time_slice["step_num"] = step_num;
+    time_slice["step_num"] = step_num * config.history_sample_rate;
     time_slice["location_to_type"] = history.location_to_types[step_num];
     simulation_history_json.emplace_back(time_slice);
   }

@@ -18,6 +18,7 @@ DEFINE_double(independent_mutation_rate, 0, "independent-mutation-rate");
 DEFINE_string(graph_name, "complete", "graph-name");
 DEFINE_string(dynamic, "birth-death", "dynamic");
 DEFINE_string(tag, "", "tag");
+DEFINE_int32(sample_rate, 1, "sample-rate");
 
 
 int main(int argc, char** argv) {
@@ -30,6 +31,7 @@ int main(int argc, char** argv) {
   config.birth_mutation_rate = FLAGS_birth_mutation_rate;
   config.independent_mutation_rate = FLAGS_independent_mutation_rate;
   config.num_steps = FLAGS_num_steps;
+  config.history_sample_rate = FLAGS_sample_rate;
   config.num_simulations = 1;
   config.compute_stats = false;
   config.capture_history = true;

@@ -74,7 +74,7 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
   int max_type = 0;
   std::vector<int> location_to_type(config.graph.N, 0);
   if (config.capture_history && history != nullptr) {
-    history->location_to_types.reserve(config.num_steps+1);
+    history->location_to_types.reserve(config.num_steps / config.history_sample_rate + 1);
     history->location_to_types.emplace_back(location_to_type);
   }
 
@@ -98,7 +98,7 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
     }
 
     // This is slow because of a copy, be careful!
-    if (config.capture_history && history != nullptr) {
+    if (config.capture_history && history != nullptr && step_num % config.history_sample_rate == 0) {
       history->location_to_types.emplace_back(location_to_type);
     }
   }

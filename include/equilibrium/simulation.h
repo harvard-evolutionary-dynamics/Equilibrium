@@ -68,6 +68,7 @@ struct SimulationConfig {
   Dynamic dynamic;
   Graph graph;
   bool capture_history;
+  int history_sample_rate;
   bool compute_stats;
 };
 
