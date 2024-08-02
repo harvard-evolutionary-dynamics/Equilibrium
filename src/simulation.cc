@@ -46,9 +46,14 @@ bool MakeStep(const StepConfig& step_config, Step* step) {
 }
 
 
-Stats Simulate(const SimulationConfig& config) {
+void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* history) {
   assert(config.graph.adjacency_list.size() == config.graph.N);
   assert(IsUndirected(config.graph));
+  assert(!config.capture_history || config.num_simulations == 1);
+  assert(!config.capture_history || history != nullptr);
+  assert(config.capture_history || history == nullptr);
+  assert(!config.compute_stats || stats != nullptr);
+  assert(config.compute_stats || stats == nullptr);
 
   // Initialize distributions.
   std::random_device rd;
@@ -68,9 +73,13 @@ Stats Simulate(const SimulationConfig& config) {
 
   int max_type = 0;
   std::vector<int> location_to_type(config.graph.N, 0);
+  if (config.capture_history && history != nullptr) {
+    history->location_to_types.reserve(config.num_steps+1);
+    history->location_to_types.emplace_back(location_to_type);
+  }
 
   // Evolve!
-  for (int step_num = 0; step_num < config.num_steps; ++step_num) {
+  for (int step_num = 1; step_num <= config.num_steps; ++step_num) {
     if (!MakeStep(step_config, &step)) {
       throw std::invalid_argument("Could not find matching dynamic for step");
     }
@@ -87,14 +96,21 @@ Stats Simulate(const SimulationConfig& config) {
       const auto mutated_location = independent_mutation_location_dist(rng);
       location_to_type[mutated_location] = ++max_type;
     }
+
+    // This is slow because of a copy, be careful!
+    if (config.capture_history && history != nullptr) {
+      history->location_to_types.emplace_back(location_to_type);
+    }
   }
 
   // Record stats.
-  Stats stats;
-  stats.number_of_types = NumberOfTypes(location_to_type);
-  stats.number_of_unmatching_pairs = NumberOfUnmatchingPairs(location_to_type);
-  stats.number_of_unmatching_links = NumberOfUnmatchingLinks(location_to_type, config.graph);
-  return stats;
+  if (config.compute_stats) {
+    stats->number_of_types = NumberOfTypes(location_to_type);
+    stats->number_of_unmatching_pairs =
+        NumberOfUnmatchingPairs(location_to_type);
+    stats->number_of_unmatching_links =
+        NumberOfUnmatchingLinks(location_to_type, config.graph);
+  }
 }
 
 int GetMeasureResult(const Stats& stats, const DiversityMeasure& measure) {
@@ -110,7 +126,8 @@ void ComputeDiversityCounts(
 ) {
 #pragma omp parallel for
   for (int trial = 0; trial < config.num_simulations; ++trial) {
-    const auto stats = equilibrium::Simulate(config);
+    Stats stats;
+    equilibrium::Simulate(config, &stats, nullptr);
 
 #pragma omp critical
     {

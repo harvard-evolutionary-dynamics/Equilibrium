@@ -13,7 +13,6 @@
 
 DEFINE_int32(N, 0, "N");
 DEFINE_int32(num_steps, 0, "num-steps");
-DEFINE_int32(num_simulations, 0, "num-simulations");
 DEFINE_double(birth_mutation_rate, 0, "birth-mutation-rate");
 DEFINE_double(independent_mutation_rate, 0, "independent-mutation-rate");
 DEFINE_string(graph_name, "complete", "graph-name");
@@ -24,14 +23,16 @@ DEFINE_string(tag, "", "tag");
 int main(int argc, char** argv) {
 
   gflags::SetUsageMessage(
-      "Simulate birth-death process with multiple mutations");
+      "Simulate birth-death process with multiple mutations: capture history");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   equilibrium::SimulationConfig config;
   config.birth_mutation_rate = FLAGS_birth_mutation_rate;
   config.independent_mutation_rate = FLAGS_independent_mutation_rate;
   config.num_steps = FLAGS_num_steps;
-  config.num_simulations = FLAGS_num_simulations;
+  config.num_simulations = 1;
+  config.compute_stats = false;
+  config.capture_history = true;
 
   if (!GetGraph(FLAGS_graph_name, FLAGS_N, &config.graph)) {
     throw std::invalid_argument("No graph named '" + FLAGS_graph_name + "'");
@@ -46,13 +47,15 @@ int main(int argc, char** argv) {
   metadata.tag = FLAGS_tag;
   metadata.start_time = std::chrono::system_clock::now();
 
-  equilibrium::DiversityCounts diversity_counts;
-  ComputeDiversityCounts(config, &diversity_counts);
+
+  equilibrium::SimulationHistory history;
+  equilibrium::Simulate(config, nullptr, &history);
   std::cout << "done" << std::endl;
 
   metadata.end_time = std::chrono::system_clock::now();
 
-  const std::string output_file_name = equilibrium::GetOutputFileName(metadata.start_time);
+  const std::string output_file_name = equilibrium::GetOutputFileName("simulation-history-", metadata.start_time);
   std::ofstream ofs{"data/" + output_file_name + ".json"};
-  equilibrium::WriteDiversityCountsToStream(diversity_counts, config, metadata, &ofs);
+
+  equilibrium::WriteSimulationHistoryToStream(history, config, metadata, &ofs);
 }

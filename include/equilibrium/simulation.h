@@ -67,13 +67,19 @@ struct SimulationConfig {
   int num_simulations;
   Dynamic dynamic;
   Graph graph;
+  bool capture_history;
+  bool compute_stats;
+};
+
+struct SimulationHistory {
+  std::vector<std::vector<int>> location_to_types;
 };
 
 void BirthDeathStep(const StepConfig&, Step*);
 void DeathBirthStep(const StepConfig&, Step*);
 bool MakeStep(const StepConfig&, Step*);
 
-Stats Simulate(const SimulationConfig&);
+void Simulate(const SimulationConfig&, Stats*, SimulationHistory*);
 
 void ComputeDiversityCounts(const equilibrium::SimulationConfig&, DiversityCounts*);
 

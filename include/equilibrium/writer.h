@@ -15,10 +15,9 @@ struct MetaData {
   std::string tag;
 };
 
-std::string GetOutputFileName();
-
-std::string GetOutputFileName(const std::chrono::time_point<std::chrono::system_clock>& time);
+std::string GetOutputFileName(const std::string& prefix, const std::chrono::time_point<std::chrono::system_clock>& time);
 void WriteDiversityCountsToStream(const DiversityCounts&, const SimulationConfig&, const MetaData&, std::ostream* os);
+void WriteSimulationHistoryToStream(const SimulationHistory&, const SimulationConfig&, const MetaData&, std::ostream* os);
 
 } // namespace equilibrium
 

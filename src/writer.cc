@@ -27,14 +27,54 @@ long long GetSeconds(const std::chrono::time_point<std::chrono::system_clock>& t
   return seconds;
 }
 
-std::string GetOutputFileName(const std::chrono::time_point<std::chrono::system_clock>& time) {
+std::string GetOutputFileName(
+  const std::string& prefix,
+  const std::chrono::time_point<std::chrono::system_clock>& time
+) {
   const auto milliseconds = GetMilliSeconds(time);
 
   std::stringstream ss;
-  ss << "equilibrium-run-";
+  ss << prefix;
   ss << milliseconds;
 
   return ss.str();
+}
+
+void WriteSimulationHistoryToStream(
+  const SimulationHistory& history,
+  const SimulationConfig& config,
+  const MetaData& metadata,
+  std::ostream* os
+) {
+  nlohmann::json j;
+  auto& config_json = j["config"];
+  config_json["graph_name"] = config.graph.name;
+  config_json["birth_mutation_rate"] = config.birth_mutation_rate;
+  config_json["independent_mutation_rate"] = config.independent_mutation_rate;
+  config_json["N"] = config.graph.N;
+  config_json["num_steps"] = config.num_steps;
+
+  std::string dynamic_str;
+  if (!ToString(config.dynamic, &dynamic_str)) {
+    dynamic_str = "unknown";
+  }
+  config_json["dynamic"] = dynamic_str;
+
+  auto& metadata_json = j["metadata"];
+  metadata_json["start_time_s"] = GetSeconds(metadata.start_time);
+  metadata_json["end_time_s"] = GetSeconds(metadata.end_time);
+  metadata_json["tag"] = metadata.tag;
+
+  auto& simulation_history_json = j["simulation_history"];
+  assert(config.num_steps+1 == history.location_to_types.size());
+  for (int step_num = 0; step_num <= config.num_steps; ++step_num) {
+    nlohmann::json time_slice;
+    time_slice["step_num"] = step_num;
+    time_slice["location_to_type"] = history.location_to_types[step_num];
+    simulation_history_json.emplace_back(time_slice);
+  }
+
+  (*os) << j;
 }
 
 void WriteDiversityCountsToStream(
