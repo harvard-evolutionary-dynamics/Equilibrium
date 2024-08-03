@@ -6,10 +6,23 @@
 
 namespace equilibrium {
 
-struct Graph {
-  int N;
-  std::string name;
-  std::vector<std::vector<int>> adjacency_list;
+class Graph {
+ public:
+  Graph() = default;
+  Graph(const int size, const std::string& name, const std::vector<std::vector<int>>& out_edges);
+
+  const int& size() const { return size_; }
+  const std::string& name() const { return name_; }
+  const std::vector<std::vector<int>>& out_edges() const { return out_edges_; }
+  const std::vector<std::vector<int>>& in_edges() const { return in_edges_; }
+
+ private:
+  void ComputeInEdges();
+
+  int size_;
+  std::string name_;
+  std::vector<std::vector<int>> out_edges_;
+  std::vector<std::vector<int>> in_edges_;
 };
 
 Graph CompleteGraph(int N);
@@ -26,6 +39,7 @@ Graph CycleGraph(int N);
 bool GetGraph(const std::string& graph_name, int N, Graph* graph);
 
 bool IsUndirected(const Graph&);
+
 
 } // namespace equilibrium
 

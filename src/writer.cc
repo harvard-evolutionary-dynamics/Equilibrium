@@ -48,10 +48,10 @@ void WriteSimulationHistoryToStream(
 ) {
   nlohmann::json j;
   auto& config_json = j["config"];
-  config_json["graph_name"] = config.graph.name;
+  config_json["graph_name"] = config.graph.name();
   config_json["birth_mutation_rate"] = config.birth_mutation_rate;
   config_json["independent_mutation_rate"] = config.independent_mutation_rate;
-  config_json["N"] = config.graph.N;
+  config_json["N"] = config.graph.size();
   config_json["num_steps"] = config.num_steps;
   config_json["sample_rate"] = config.history_sample_rate;
 
@@ -85,10 +85,10 @@ void WriteDiversityCountsToStream(
 ) {
   nlohmann::json j;
   auto& config_json = j["config"];
-  config_json["graph_name"] = config.graph.name;
+  config_json["graph_name"] = config.graph.name();
   config_json["birth_mutation_rate"] = config.birth_mutation_rate;
   config_json["independent_mutation_rate"] = config.independent_mutation_rate;
-  config_json["N"] = config.graph.N;
+  config_json["N"] = config.graph.size();
   config_json["num_steps"] = config.num_steps;
   config_json["num_simulations"] = config.num_simulations;
 

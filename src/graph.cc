@@ -6,78 +6,75 @@
 
 namespace equilibrium {
 
+Graph::Graph(const int N, const std::string& name, const std::vector<std::vector<int>>& out_edges) : size_(N), name_(name), out_edges_(out_edges) {
+ ComputeInEdges();
+}
+
 Graph CompleteGraph(int N) {
-  Graph graph;
-  graph.N = N;
-  graph.name = "complete";
-  graph.adjacency_list.resize(N);
+  std::vector<std::vector<int>> out_edges;
+  out_edges.resize(N);
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < N; ++j) {
       if (i != j) {
-        graph.adjacency_list[i].emplace_back(j);
+        out_edges[i].emplace_back(j);
       }
     }
   }
-  return graph;
+
+  return {N, "complete", out_edges};
 }
 
 Graph StarGraph(int N) {
-  Graph graph;
-  graph.N = N;
-  graph.name = "star";
-  graph.adjacency_list.resize(N);
+  std::vector<std::vector<int>> out_edges;
+  out_edges.resize(N);
 
   for (int j = 1; j < N; ++j) {
-    graph.adjacency_list[0].emplace_back(j);
-    graph.adjacency_list[j].emplace_back(0);
+    out_edges[0].emplace_back(j);
+    out_edges[j].emplace_back(0);
   }
 
-  return graph;
+  return {N, "star", out_edges};
 }
 
 Graph CycleGraph(int N) {
-  Graph graph;
-  graph.N = N;
-  graph.name = "cycle";
-  graph.adjacency_list.resize(N);
+  std::vector<std::vector<int>> out_edges;
+  out_edges.resize(N);
 
   for (int i = 0; i < N; ++i) {
     const auto next = (i+1) % N;
-    graph.adjacency_list[i].emplace_back(next);
-    graph.adjacency_list[next].emplace_back(i);
+    out_edges[i].emplace_back(next);
+    out_edges[next].emplace_back(i);
   }
 
-  return graph;
+  return {N, "cycle", out_edges};
 }
 
 Graph DoubleStarGraph(int N) {
-  Graph graph;
-  graph.N = N;
-  graph.name = "double star";
+  std::vector<std::vector<int>> out_edges;
 
   const auto left_star = StarGraph(N/2 + N%2);
   const auto right_star = StarGraph(N/2);
 
-  graph.adjacency_list.resize(N);
+  out_edges.resize(N);
 
   if (N > 1) {
-    graph.adjacency_list[0].emplace_back(1);
-    graph.adjacency_list[1].emplace_back(0);
+    out_edges[0].emplace_back(1);
+    out_edges[1].emplace_back(0);
   }
 
   for (int j = 1; j < N/2 + N%2; ++j) {
     // Left.
-    graph.adjacency_list[0].emplace_back(2*j);
-    graph.adjacency_list[2*j].emplace_back(0);
+    out_edges[0].emplace_back(2*j);
+    out_edges[2*j].emplace_back(0);
 
     // Right.
     if (2*j+1 < N) {
-      graph.adjacency_list[1].emplace_back(2 * j + 1);
-      graph.adjacency_list[2 * j + 1].emplace_back(1);
+      out_edges[1].emplace_back(2 * j + 1);
+      out_edges[2 * j + 1].emplace_back(1);
     }
   }
 
-  return graph;
+  return {N, "double star", out_edges};
 }
 
 bool GetGraph(const std::string& graph_name, int N, Graph* graph) {
@@ -102,8 +99,8 @@ bool GetGraph(const std::string& graph_name, int N, Graph* graph) {
 
 bool IsUndirected(const Graph& graph) {
   std::set<std::pair<int, int>> edges;
-  for (int i = 0; i < graph.N; ++i) {
-    for (const auto& j: graph.adjacency_list[i]) {
+  for (int i = 0; i < graph.size(); ++i) {
+    for (const auto& j: graph.out_edges()[i]) {
       edges.insert({i, j});
     }
   }
@@ -116,6 +113,18 @@ bool IsUndirected(const Graph& graph) {
   }
 
   return true;
+}
+
+void Graph::ComputeInEdges() {
+  // Assumes graph.out_edges is already specified.
+  in_edges_.clear();
+  in_edges_.resize(size_);
+
+  for (int i = 0; i < size_; ++i) {
+    for (int j : out_edges_[i]) {
+      in_edges_[j].emplace_back(i);
+    }
+  }
 }
 
 }  // namespace equilibrium

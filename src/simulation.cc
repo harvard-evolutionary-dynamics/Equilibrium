@@ -22,7 +22,7 @@ void BirthDeathStep(const StepConfig& step_config, Step* step) {
   // bd step.
   step->birther = step_config.first_step_dist(step_config.rng);
   const auto dier_idx = step_config.second_step_idx_dists[step->birther](step_config.rng);
-  step->dier = step_config.graph.adjacency_list[step->birther][dier_idx];
+  step->dier = step_config.graph.out_edges()[step->birther][dier_idx];
 }
 
 void DeathBirthStep(const StepConfig& step_config, Step* step) {
@@ -30,7 +30,7 @@ void DeathBirthStep(const StepConfig& step_config, Step* step) {
   // Note: assumes the graph is undirected.
   step->dier = step_config.first_step_dist(step_config.rng);
   const auto birther_idx = step_config.second_step_idx_dists[step->dier](step_config.rng);
-  step->birther = step_config.graph.adjacency_list[step->dier][birther_idx];
+  step->birther = step_config.graph.out_edges()[step->dier][birther_idx];
 }
 
 bool MakeStep(const StepConfig& step_config, Step* step) {
@@ -47,7 +47,7 @@ bool MakeStep(const StepConfig& step_config, Step* step) {
 
 
 void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* history) {
-  assert(config.graph.adjacency_list.size() == config.graph.N);
+  assert(config.graph.out_edges().size() == config.graph.size());
   assert(IsUndirected(config.graph));
   assert(!config.capture_history || config.num_simulations == 1);
   assert(!config.capture_history || history != nullptr);
@@ -58,21 +58,21 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
   // Initialize distributions.
   std::random_device rd;
   std::mt19937 rng(rd());
-  std::uniform_int_distribution<> first_step_dist(0, config.graph.N-1);
-  std::vector<std::uniform_int_distribution<>> second_step_idx_dists(config.graph.N);
-  for (int i = 0; i < config.graph.N; ++i) {
-    second_step_idx_dists[i] = std::uniform_int_distribution<>(0, config.graph.adjacency_list[i].size()-1);
+  std::uniform_int_distribution<> first_step_dist(0, config.graph.size()-1);
+  std::vector<std::uniform_int_distribution<>> second_step_idx_dists(config.graph.size());
+  for (int i = 0; i < config.graph.size(); ++i) {
+    second_step_idx_dists[i] = std::uniform_int_distribution<>(0, config.graph.out_edges()[i].size()-1);
   }
   std::uniform_real_distribution<> birth_mutation_dist(0.0, 1.0);
   std::uniform_real_distribution<> independent_mutation_dist(0.0, 1.0);
-  std::uniform_int_distribution<> independent_mutation_location_dist(0, config.graph.N-1);
+  std::uniform_int_distribution<> independent_mutation_location_dist(0, config.graph.size()-1);
 
   // Configure the step options.
   StepConfig step_config(config.dynamic, config.graph, first_step_dist, second_step_idx_dists, rng);
   Step step;
 
   int max_type = 0;
-  std::vector<int> location_to_type(config.graph.N, 0);
+  std::vector<int> location_to_type(config.graph.size(), 0);
   if (config.capture_history && history != nullptr) {
     history->location_to_types.reserve(config.num_steps / config.history_sample_rate + 1);
     history->location_to_types.emplace_back(location_to_type);
@@ -160,8 +160,8 @@ int NumberOfUnmatchingPairs(const std::vector<int>& location_to_type) {
 int NumberOfUnmatchingLinks(const std::vector<int>& location_to_type, const Graph& graph) {
   // Note: this assumes the graph is undirected.
   int num = 0;
-  for (int i = 0; i < graph.N; ++i) {
-    for (const auto& j : graph.adjacency_list[i]) {
+  for (int i = 0; i < graph.size(); ++i) {
+    for (const auto& j : graph.out_edges()[i]) {
       if ((i < j) && (location_to_type[i] != location_to_type[j])) {
         ++num;
       }
