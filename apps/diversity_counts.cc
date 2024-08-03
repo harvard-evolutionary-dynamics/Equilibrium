@@ -11,7 +11,7 @@
 #include <omp.h>
 #include <prettyprint.hpp>
 
-DEFINE_int32(N, 0, "N");
+DEFINE_int32(N, 1, "N");
 DEFINE_int32(num_steps, 0, "num-steps");
 DEFINE_int32(num_simulations, 0, "num-simulations");
 DEFINE_double(birth_mutation_rate, 0, "birth-mutation-rate");

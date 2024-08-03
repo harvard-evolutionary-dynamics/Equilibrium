@@ -47,6 +47,7 @@ bool MakeStep(const StepConfig& step_config, Step* step) {
 }
 
 void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* history) {
+  assert(config.graph.size() > 0);
   assert(config.graph.out_edges().size() == config.graph.size());
   assert(!config.capture_history || config.num_simulations == 1);
   assert(!config.capture_history || history != nullptr);
@@ -63,7 +64,9 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
   // Assuming there are only two dynamics: bd and db.
   const auto& neighbors = config.dynamic == Dynamic::BIRTH_DEATH ? config.graph.out_edges() : config.graph.in_edges();
   for (int i = 0; i < config.graph.size(); ++i) {
-    second_step_idx_dists[i] = std::uniform_int_distribution<>(0, neighbors[i].size()-1);
+    if (neighbors[i].size() > 0) {
+      second_step_idx_dists[i] = std::uniform_int_distribution<>(0, neighbors[i].size()-1);
+    }
   }
   std::uniform_real_distribution<> birth_mutation_dist(0.0, 1.0);
   std::uniform_real_distribution<> independent_mutation_dist(0.0, 1.0);
