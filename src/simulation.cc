@@ -18,33 +18,33 @@ StepConfig::StepConfig(
     first_step_dist(first_step_dist),
     second_step_idx_dists(second_step_idx_dists), rng(rng) {}
 
-void BirthDeathStep(const StepConfig& step_config, Step* step) {
+bool BirthDeathStep(const StepConfig& step_config, Step* step) {
   // bd step.
   step->birther = step_config.first_step_dist(step_config.rng);
   const auto dier_idx = step_config.second_step_idx_dists[step->birther](step_config.rng);
+  if (step_config.graph.out_edges()[step->birther].empty()) return false;
   step->dier = step_config.graph.out_edges()[step->birther][dier_idx];
+  return true;
 }
 
-void DeathBirthStep(const StepConfig& step_config, Step* step) {
+bool DeathBirthStep(const StepConfig& step_config, Step* step) {
   // db step.
-  // Note: assumes the graph is undirected.
   step->dier = step_config.first_step_dist(step_config.rng);
   const auto birther_idx = step_config.second_step_idx_dists[step->dier](step_config.rng);
-  step->birther = step_config.graph.out_edges()[step->dier][birther_idx];
+  if (step_config.graph.in_edges()[step->dier].empty()) return false;
+  step->birther = step_config.graph.in_edges()[step->dier][birther_idx];
+  return true;
 }
 
 bool MakeStep(const StepConfig& step_config, Step* step) {
   if (step_config.dynamic == Dynamic::BIRTH_DEATH) {
-    BirthDeathStep(step_config, step);
-    return true;
+    return BirthDeathStep(step_config, step);
   }
   if (step_config.dynamic == Dynamic::DEATH_BIRTH) {
-    DeathBirthStep(step_config, step);
-    return true;
+    return DeathBirthStep(step_config, step);
   }
   return false;
 }
-
 
 void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* history) {
   assert(config.graph.out_edges().size() == config.graph.size());
@@ -60,8 +60,11 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
   std::mt19937 rng(rd());
   std::uniform_int_distribution<> first_step_dist(0, config.graph.size()-1);
   std::vector<std::uniform_int_distribution<>> second_step_idx_dists(config.graph.size());
+
+  // Assuming there are only two dynamics: bd and db.
+  const auto& neighbors = config.dynamic == Dynamic::BIRTH_DEATH ? config.graph.out_edges() : config.graph.in_edges();
   for (int i = 0; i < config.graph.size(); ++i) {
-    second_step_idx_dists[i] = std::uniform_int_distribution<>(0, config.graph.out_edges()[i].size()-1);
+    second_step_idx_dists[i] = std::uniform_int_distribution<>(0, neighbors[i].size()-1);
   }
   std::uniform_real_distribution<> birth_mutation_dist(0.0, 1.0);
   std::uniform_real_distribution<> independent_mutation_dist(0.0, 1.0);
@@ -80,15 +83,13 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
 
   // Evolve!
   for (int step_num = 1; step_num <= config.num_steps; ++step_num) {
-    if (!MakeStep(step_config, &step)) {
-      throw std::invalid_argument("Could not find matching dynamic for step");
-    }
+    if (MakeStep(step_config, &step)) {
+      location_to_type[step.dier] = location_to_type[step.birther];
 
-    location_to_type[step.dier] = location_to_type[step.birther];
-
-    // Possibly mutate birth.
-    if (birth_mutation_dist(rng) < config.birth_mutation_rate) {
-      location_to_type[step.dier] = ++max_type;
+      // Possibly mutate birth.
+      if (birth_mutation_dist(rng) < config.birth_mutation_rate) {
+        location_to_type[step.dier] = ++max_type;
+      }
     }
 
     // Possibly independent mutation.

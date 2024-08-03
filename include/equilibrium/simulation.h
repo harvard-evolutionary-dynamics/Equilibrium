@@ -76,8 +76,8 @@ struct SimulationHistory {
   std::vector<std::vector<int>> location_to_types;
 };
 
-void BirthDeathStep(const StepConfig&, Step*);
-void DeathBirthStep(const StepConfig&, Step*);
+bool BirthDeathStep(const StepConfig&, Step*);
+bool DeathBirthStep(const StepConfig&, Step*);
 bool MakeStep(const StepConfig&, Step*);
 
 void Simulate(const SimulationConfig&, Stats*, SimulationHistory*);
