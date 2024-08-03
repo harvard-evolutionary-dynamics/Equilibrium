@@ -22,11 +22,11 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
             /W3)
 endif ()
 
-add_custom_command(
-        TARGET diversity_counts
-        PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -DSRC_DIR="${CMAKE_SOURCE_DIR}/data" -DDEST_DIR="${CMAKE_CURRENT_BINARY_DIR}/data" -P "${CMAKE_SOURCE_DIR}/cmake/configure_files.cmake"
-)
+# add_custom_command(
+#         TARGET diversity_counts
+#         PRE_BUILD
+#         COMMAND ${CMAKE_COMMAND} -DSRC_DIR="${CMAKE_SOURCE_DIR}/data" -DDEST_DIR="${CMAKE_CURRENT_BINARY_DIR}/data" -P "${CMAKE_SOURCE_DIR}/cmake/configure_files.cmake"
+# )
 
 ################# END diversity_counts ####################
 
@@ -54,10 +54,10 @@ elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
             /W3)
 endif ()
 
-add_custom_command(
-        TARGET simulation_history
-        PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -DSRC_DIR="${CMAKE_SOURCE_DIR}/data" -DDEST_DIR="${CMAKE_CURRENT_BINARY_DIR}/data" -P "${CMAKE_SOURCE_DIR}/cmake/configure_files.cmake"
-)
+# add_custom_command(
+#         TARGET simulation_history
+#         PRE_BUILD
+#         COMMAND ${CMAKE_COMMAND} -DSRC_DIR="${CMAKE_SOURCE_DIR}/data" -DDEST_DIR="${CMAKE_CURRENT_BINARY_DIR}/data" -P "${CMAKE_SOURCE_DIR}/cmake/configure_files.cmake"
+# )
 
 ################# END simulation_history ####################
