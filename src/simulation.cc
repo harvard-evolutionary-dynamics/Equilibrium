@@ -48,7 +48,6 @@ bool MakeStep(const StepConfig& step_config, Step* step) {
 
 void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* history) {
   assert(config.graph.out_edges().size() == config.graph.size());
-  assert(IsUndirected(config.graph));
   assert(!config.capture_history || config.num_simulations == 1);
   assert(!config.capture_history || history != nullptr);
   assert(config.capture_history || history == nullptr);
@@ -145,7 +144,7 @@ int NumberOfTypes(const std::vector<int>& location_to_type) {
 }
 
 int NumberOfUnmatchingPairs(const std::vector<int>& location_to_type) {
-  // Note: this assumes the graph is undirected.
+  // Note: this considers unordered pairs exactly once.
   int num = 0;
   for (int i = 0; i < location_to_type.size(); ++i) {
     for (int j = i+1; j < location_to_type.size(); ++j) {
@@ -159,11 +158,10 @@ int NumberOfUnmatchingPairs(const std::vector<int>& location_to_type) {
 }
 
 int NumberOfUnmatchingLinks(const std::vector<int>& location_to_type, const Graph& graph) {
-  // Note: this assumes the graph is undirected.
   int num = 0;
   for (int i = 0; i < graph.size(); ++i) {
     for (const auto& j : graph.out_edges()[i]) {
-      if ((i < j) && (location_to_type[i] != location_to_type[j])) {
+      if (location_to_type[i] != location_to_type[j]) {
         ++num;
       }
     }

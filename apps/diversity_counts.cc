@@ -22,7 +22,6 @@ DEFINE_string(tag, "", "tag");
 
 
 int main(int argc, char** argv) {
-
   gflags::SetUsageMessage(
       "Simulate birth-death process with multiple mutations: capture final diversity");
   gflags::ParseCommandLineFlags(&argc, &argv, true);

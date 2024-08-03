@@ -38,7 +38,7 @@ Graph CycleGraph(int N);
 
 bool GetGraph(const std::string& graph_name, int N, Graph* graph);
 
-bool IsUndirected(const Graph&);
+bool IsBidirectional(const Graph&);
 
 
 } // namespace equilibrium

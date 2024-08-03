@@ -43,7 +43,7 @@ TEST_CASE("N=1", "[NumberOfUnmatchingPairs]") {
 
 TEST_CASE("fully diverse links", "[NumberOfUnmatchingLinks]") {
   const equilibrium::Graph graph{3, "", {{1}, {2, 0}, {1}}};
-  REQUIRE(equilibrium::NumberOfUnmatchingLinks({0, 1, 2}, graph) == 2);
+  REQUIRE(equilibrium::NumberOfUnmatchingLinks({0, 1, 2}, graph) == 2*2);
 }
 
 TEST_CASE("fully homogeneous links", "[NumberOfUnmatchingLinks]") {
@@ -53,7 +53,12 @@ TEST_CASE("fully homogeneous links", "[NumberOfUnmatchingLinks]") {
 
 TEST_CASE("mixed population links", "[NumberOfUnmatchingLinks]") {
   const equilibrium::Graph graph{5, "", {{1, 2, 3, 4}, {0, 2}, {0, 1, 3}, {0, 2}, {0}}};
-  REQUIRE(equilibrium::NumberOfUnmatchingLinks({2, 1, 2, 0, 2}, graph) == 4);
+  REQUIRE(equilibrium::NumberOfUnmatchingLinks({2, 1, 2, 0, 2}, graph) == 4*2);
+}
+
+TEST_CASE("directed mixed population links", "[NumberOfUnmatchingLinks]") {
+  const equilibrium::Graph graph{3, "", {{1}, {0, 2}, {}}};
+  REQUIRE(equilibrium::NumberOfUnmatchingLinks({2, 1, 2}, graph) == 3);
 }
 
 TEST_CASE("N=1 links", "[NumberOfUnmatchingLinks]") {
@@ -134,14 +139,14 @@ TEST_CASE("double star N=5", "[DoubleStarGraph]") {
   REQUIRE(double_star.out_edges() == expected);
 }
 
-TEST_CASE("undirected graph", "[IsUndirected]") {
+TEST_CASE("undirected graph", "[IsBidirectional]") {
   const equilibrium::Graph graph{4, "", {{1}, {0, 2, 3}, {1, 3}, {1, 2}}};
-  REQUIRE(equilibrium::IsUndirected(graph));
+  REQUIRE(equilibrium::IsBidirectional(graph));
 }
 
-TEST_CASE("directed graph", "[IsUndirected]") {
+TEST_CASE("directed graph", "[IsBidirectional]") {
   const equilibrium::Graph graph{4, "", {{1}, {2, 3}, {1, 3}, {1, 2}}};
-  REQUIRE(!equilibrium::IsUndirected(graph));
+  REQUIRE(!equilibrium::IsBidirectional(graph));
 }
 
 TEST_CASE("directed graph has correct in edges", "[ComputeInEdges]") {

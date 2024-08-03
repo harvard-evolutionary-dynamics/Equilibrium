@@ -97,7 +97,7 @@ bool GetGraph(const std::string& graph_name, int N, Graph* graph) {
   return false;
 }
 
-bool IsUndirected(const Graph& graph) {
+bool IsBidirectional(const Graph& graph) {
   std::set<std::pair<int, int>> edges;
   for (int i = 0; i < graph.size(); ++i) {
     for (const auto& j: graph.out_edges()[i]) {
