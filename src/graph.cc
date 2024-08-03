@@ -77,6 +77,16 @@ Graph DoubleStarGraph(int N) {
   return {N, "double star", out_edges};
 }
 
+Graph DirectedLineGraph(int N) {
+  std::vector<std::vector<int>> out_edges;
+  out_edges.resize(N);
+  for (int i = 0; i < N-1; ++i) {
+    out_edges[i].emplace_back(i+1);
+  }
+
+  return {N, "directed line", out_edges};
+}
+
 bool GetGraph(const std::string& graph_name, int N, Graph* graph) {
   if (graph_name == "complete") {
     *graph = CompleteGraph(N);
@@ -92,6 +102,10 @@ bool GetGraph(const std::string& graph_name, int N, Graph* graph) {
   }
   if (graph_name == "double-star") {
     *graph = DoubleStarGraph(N);
+    return true;
+  }
+  if (graph_name == "directed-line") {
+    *graph = DirectedLineGraph(N);
     return true;
   }
   return false;

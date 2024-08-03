@@ -36,6 +36,9 @@ Graph DoubleStarGraph(int N);
 
 Graph CycleGraph(int N);
 
+/// Root is 0, leaf is N-1.
+Graph DirectedLineGraph(int N);
+
 bool GetGraph(const std::string& graph_name, int N, Graph* graph);
 
 bool IsBidirectional(const Graph&);

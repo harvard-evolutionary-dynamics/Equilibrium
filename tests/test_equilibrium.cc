@@ -84,6 +84,15 @@ TEST_CASE("cycle graph", "[CycleGraph]") {
   REQUIRE(cycle.out_edges() == expected);
 }
 
+TEST_CASE("directed line graph", "[DirectedLineGraph]") {
+  const auto line = equilibrium::DirectedLineGraph(4);
+  REQUIRE(line.size() == 4);
+  REQUIRE(line.name() == "directed line");
+
+  const std::vector<std::vector<int>> expected = {{1}, {2}, {3}, {}};
+  REQUIRE(line.out_edges() == expected);
+}
+
 TEST_CASE("complete graph", "[CompleteGraph]") {
   const auto complete = equilibrium::CompleteGraph(4);
   REQUIRE(complete.size() == 4);
