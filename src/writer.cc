@@ -66,12 +66,22 @@ void WriteSimulationHistoryToStream(
   metadata_json["end_time_s"] = GetSeconds(metadata.end_time);
   metadata_json["tag"] = metadata.tag;
 
-  auto& simulation_history_json = j["simulation_history"];
+  auto& results_json = j["results"];
+
+  auto& simulation_history_json = results_json["simulation_history"];
   for (int step_num = 0; step_num < history.location_to_types.size(); ++step_num) {
     nlohmann::json time_slice;
     time_slice["step_num"] = step_num * config.history_sample_rate;
     time_slice["location_to_type"] = history.location_to_types[step_num];
     simulation_history_json.emplace_back(time_slice);
+  }
+
+  auto& ancestry_json = results_json["ancestry"];
+  for (int child_type = 0; child_type < history.ancestry.size(); ++child_type) {
+    nlohmann::json parent_child;
+    parent_child["child"] = child_type;
+    parent_child["parent"] = history.ancestry[child_type];
+    ancestry_json.emplace_back(parent_child);
   }
 
   (*os) << j;

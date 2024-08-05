@@ -81,6 +81,10 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
   if (config.capture_history && history != nullptr) {
     history->location_to_types.reserve(config.num_steps / config.history_sample_rate + 1);
     history->location_to_types.emplace_back(location_to_type);
+
+    history->ancestry.reserve(config.num_steps + 1);
+    // Type 0 has no ancestry.
+    history->ancestry.emplace_back(kNoAncestry);
   }
 
   // Evolve!
@@ -91,6 +95,11 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
       // Possibly mutate birth.
       if (birth_mutation_dist(rng) < config.birth_mutation_rate) {
         location_to_type[step.dier] = ++max_type;
+
+        if (config.capture_history && history != nullptr) {
+          history->ancestry.emplace_back(location_to_type[step.birther]);
+          assert(history->ancestry.size() == max_type+1);
+        }
       }
     }
 
@@ -98,6 +107,11 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
     if (independent_mutation_dist(rng) < config.independent_mutation_rate) {
       const auto mutated_location = independent_mutation_location_dist(rng);
       location_to_type[mutated_location] = ++max_type;
+
+      if (config.capture_history && history != nullptr) {
+        history->ancestry.emplace_back(kNoAncestry);
+        assert(history->ancestry.size() == max_type+1);
+      }
     }
 
     // This is slow because of a copy, be careful!

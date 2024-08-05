@@ -72,8 +72,12 @@ struct SimulationConfig {
   bool compute_stats;
 };
 
+const int kNoAncestry = -1;
+
 struct SimulationHistory {
   std::vector<std::vector<int>> location_to_types;
+  /// ancestry[i] == parent of i if i came from birth, otherwise it is -1.
+  std::vector<int> ancestry;
 };
 
 bool BirthDeathStep(const StepConfig&, Step*);
