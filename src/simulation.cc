@@ -49,7 +49,7 @@ bool MakeStep(const StepConfig& step_config, Step* step) {
 void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* history) {
   assert(config.graph.size() > 0);
   assert(config.graph.out_edges().size() == config.graph.size());
-  assert(!config.capture_history || config.num_simulations == 1);
+  // assert(!config.capture_history || config.num_simulations == 1);
   assert(!config.capture_history || history != nullptr);
   assert(config.capture_history || history == nullptr);
   assert(!config.compute_stats || stats != nullptr);
@@ -78,6 +78,12 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
 
   int max_type = 0;
   std::vector<int> location_to_type(config.graph.size(), 0);
+  if (config.start_with_max_diversity) {
+    for (int i = 0; i < location_to_type.size(); ++i) {
+      location_to_type[i] = i;
+    }
+    max_type = config.graph.size() - 1;
+  }
   if (config.capture_history && history != nullptr) {
     history->location_to_types.reserve(config.num_steps / config.history_sample_rate + 1);
     history->location_to_types.emplace_back(location_to_type);
@@ -88,7 +94,10 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
   }
 
   // Evolve!
-  for (int step_num = 1; step_num <= config.num_steps; ++step_num) {
+  int step_num;
+  for (step_num = 1;
+       config.run_until_homogeneous ? !IsHomogeneous(location_to_type) : (step_num <= config.num_steps);
+       ++step_num) {
     if (MakeStep(step_config, &step)) {
       location_to_type[step.dier] = location_to_type[step.birther];
 
@@ -127,6 +136,23 @@ void Simulate(const SimulationConfig& config, Stats* stats, SimulationHistory* h
         NumberOfUnmatchingPairs(location_to_type);
     stats->number_of_unmatching_links =
         NumberOfUnmatchingLinks(location_to_type, config.graph);
+    stats->number_of_steps = step_num-1;
+  }
+}
+
+void ComputeSimulationHistories(
+    const SimulationConfig& config,
+    SimulationHistories* simulation_histories
+) {
+#pragma omp parallel for
+  for (int trial = 0; trial < config.num_simulations; ++trial) {
+    equilibrium::SimulationHistory history;
+    equilibrium::Simulate(config, nullptr, &history);
+
+#pragma omp critical
+    {
+      simulation_histories->emplace_back(history);
+    }
   }
 }
 
@@ -153,6 +179,17 @@ void ComputeDiversityCounts(
       }
     }
   }
+}
+
+void ComputeTrends(
+    const equilibrium::SimulationConfig& config,
+    std::map<int, int>* absorption_times
+) {
+
+}
+
+bool IsHomogeneous(const std::vector<int>& location_to_type) {
+  return NumberOfTypes(location_to_type) == 1;
 }
 
 int NumberOfTypes(const std::vector<int>& location_to_type) {

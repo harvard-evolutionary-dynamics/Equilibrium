@@ -164,3 +164,54 @@ TEST_CASE("directed graph has correct in edges", "[ComputeInEdges]") {
   REQUIRE(graph.in_edges() == expected);
 }
 
+TEST_CASE("directed line", "[GetGraph]") {
+  equilibrium::Graph graph;
+  equilibrium::GetGraph("directed-line", 5, &graph);
+  const std::vector<std::vector<int>> expected = {{1}, {2}, {3}, {4}, {}};
+  REQUIRE(graph.out_edges() == expected);
+}
+
+TEST_CASE("directed line n=5", "[DirectedLineGraph]") {
+  const auto directed_line = equilibrium::DirectedLineGraph(5);
+  REQUIRE(directed_line.size() == 5);
+  REQUIRE(directed_line.name() == "directed line");
+
+  const std::vector<std::vector<int>> expected = {{1}, {2}, {3}, {4}, {}};
+  REQUIRE(directed_line.out_edges() == expected);
+}
+
+TEST_CASE("line", "[LineGraph]") {
+  const auto line = equilibrium::LineGraph(5);
+  REQUIRE(line.size() == 5);
+  REQUIRE(line.name() == "line");
+
+  const std::vector<std::vector<int>> expected = {{1}, {0, 2}, {1, 3}, {2, 4}, {3}};
+  REQUIRE(line.out_edges() == expected);
+}
+
+TEST_CASE("contracting path", "[ContractingPathGraph]") {
+  const auto graph = equilibrium::ContractingPathGraph(9);
+  REQUIRE(graph.size() == 9);
+  REQUIRE(graph.name() == "contracting path");
+
+  const std::vector<std::vector<int>> expected = {
+      {1, 2,3,4}, {0, 2,3,4}, {1, 3,4}, {2, 4},
+      {3,5},
+      {4, 6}, {4,5, 7}, {4,5,6, 8}, {4,5,6, 7}
+  };
+  REQUIRE(graph.out_edges() == expected);
+}
+
+TEST_CASE("barbell", "[BarbellGraph]") {
+  const auto graph = equilibrium::BarbellGraph(9);
+  REQUIRE(graph.size() == 9);
+  REQUIRE(graph.name() == "barbell");
+
+  const std::vector<std::vector<int>> expected = {
+      {1,2}, {0,2}, {0,1, 3},
+      {2, 4}, {3,5}, {4, 6},
+      {5, 7,8}, {6,8}, {6,7},
+  };
+  REQUIRE(graph.out_edges() == expected);
+}
+

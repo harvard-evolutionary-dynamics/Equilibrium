@@ -1,3 +1,4 @@
+#include <map>
 #include <set>
 #include <string>
 #include <utility>
@@ -5,6 +6,7 @@
 #include <equilibrium/graph.h>
 
 namespace equilibrium {
+
 
 Graph::Graph(const int N, const std::string& name, const std::vector<std::vector<int>>& out_edges) : size_(N), name_(name), out_edges_(out_edges) {
  ComputeInEdges();
@@ -87,28 +89,107 @@ Graph DirectedLineGraph(int N) {
   return {N, "directed line", out_edges};
 }
 
+Graph LineGraph(int N) {
+  std::vector<std::vector<int>> out_edges;
+  out_edges.resize(N);
+  for (int i = 0; i < N-1; ++i) {
+    out_edges[i].emplace_back(i+1);
+    out_edges[i+1].emplace_back(i);
+  }
+
+  return {N, "line", out_edges};
+}
+
+Graph ContractingPathGraph(int N) {
+  std::vector<std::vector<int>> out_edges;
+  out_edges.resize(N);
+
+  const int midpoint = N / 2;
+
+  // Left spine.
+  for (int i = 0; i < midpoint; ++i) {
+    out_edges[i+1].emplace_back(i);
+  }
+
+  // Left Blade.
+  for (int i = 0; i < midpoint; ++i) {
+    for (int j = i+1; j <= midpoint; ++j) {
+      out_edges[i].emplace_back(j);
+    }
+  }
+
+  // Right Blade.
+  for (int i = N-1; i > midpoint; --i) {
+    for (int j = midpoint; j < i; ++j) {
+      out_edges[i].emplace_back(j);
+    }
+  }
+
+  // Right spine.
+  for (int i = midpoint; i < N-1; ++i) {
+    out_edges[i].emplace_back(i+1);
+  }
+
+  return {N, "contracting path", out_edges};
+}
+
+Graph BarbellGraph(int N) {
+  const int N_clique = N / 3;
+  const int N_path = N - 2 * N_clique;
+  const Graph left_clique = CompleteGraph(N_clique);
+  const Graph path = LineGraph(N_path);
+  const Graph right_clique = CompleteGraph(N_clique);
+
+  std::vector<std::vector<int>> out_edges;
+  out_edges.resize(N);
+
+  // Left clique.
+  for (int u = 0; u < N_clique; ++u) {
+    for (const auto& v : left_clique.out_edges()[u]) {
+      out_edges[u].emplace_back(v);
+    }
+  }
+
+  out_edges[N_clique-1].emplace_back(N_clique);
+  out_edges[N_clique].emplace_back(N_clique-1);
+
+  for (int u = 0; u < N_path; ++u) {
+    for (const auto& v : path.out_edges()[u]) {
+      out_edges[u+N_clique].emplace_back(v+N_clique);
+    }
+  }
+
+  out_edges[N_clique+N_path-1].emplace_back(N_clique+N_path);
+  out_edges[N_clique+N_path].emplace_back(N_clique+N_path-1);
+
+  // Right clique.
+  for (int u = 0; u < N_clique; ++u) {
+    for (const auto& v : right_clique.out_edges()[u]) {
+      out_edges[u+N_clique+N_path].emplace_back(v+N_clique+N_path);
+    }
+  }
+
+  return {N, "barbell", out_edges};
+}
+
+const std::map<std::string, std::function<Graph(int)>> kGraphNameToGenerator {
+    {"complete", CompleteGraph},
+    {"star", StarGraph},
+    {"cycle", CycleGraph},
+    {"double-star", DoubleStarGraph},
+    {"directed-line", DirectedLineGraph},
+    {"line", LineGraph},
+    {"contracting-path", ContractingPathGraph},
+    {"barbell", BarbellGraph},
+};
+
 bool GetGraph(const std::string& graph_name, int N, Graph* graph) {
-  if (graph_name == "complete") {
-    *graph = CompleteGraph(N);
-    return true;
+  if (kGraphNameToGenerator.find(graph_name) == kGraphNameToGenerator.end()) {
+    return false;
   }
-  if (graph_name == "star") {
-    *graph = StarGraph(N);
-    return true;
-  }
-  if (graph_name == "cycle") {
-    *graph = CycleGraph(N);
-    return true;
-  }
-  if (graph_name == "double-star") {
-    *graph = DoubleStarGraph(N);
-    return true;
-  }
-  if (graph_name == "directed-line") {
-    *graph = DirectedLineGraph(N);
-    return true;
-  }
-  return false;
+  const auto& graph_generator_fn = kGraphNameToGenerator.at(graph_name);
+  *graph = graph_generator_fn(N);
+  return true;
 }
 
 bool IsBidirectional(const Graph& graph) {

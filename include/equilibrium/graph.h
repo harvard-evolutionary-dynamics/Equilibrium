@@ -39,6 +39,15 @@ Graph CycleGraph(int N);
 /// Root is 0, leaf is N-1.
 Graph DirectedLineGraph(int N);
 
+/// Undirected.
+Graph LineGraph(int N);
+
+/// Contracting Path.
+Graph ContractingPathGraph(int N);
+
+/// Barbell Graph.
+Graph BarbellGraph(int N);
+
 bool GetGraph(const std::string& graph_name, int N, Graph* graph);
 
 bool IsBidirectional(const Graph&);

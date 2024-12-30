@@ -10,6 +10,14 @@
 
 namespace equilibrium {
 
+const int kNoAncestry = -1;
+
+struct SimulationHistory {
+  std::vector<std::vector<int>> location_to_types;
+  /// ancestry[i] == parent of i if i came from birth, otherwise it is -1.
+  std::vector<int> ancestry;
+};
+
 enum class DiversityMeasure {
   NUMBER_OF_TYPES,
   NUMBER_OF_UNMATCHING_PAIRS,
@@ -23,6 +31,8 @@ const std::vector<DiversityMeasure> DIVERSITY_MEASURES = {
 };
 
 using DiversityCounts = std::map<DiversityMeasure, std::map<int, int>>;
+using SimulationHistories = std::vector<SimulationHistory>;
+using Trends = std::map<int, std::vector<int>>;
 
 enum class Dynamic {
   BIRTH_DEATH,
@@ -58,6 +68,7 @@ struct Stats {
   int number_of_types;
   int number_of_unmatching_pairs;
   int number_of_unmatching_links;
+  int number_of_steps;
 };
 
 struct SimulationConfig {
@@ -70,15 +81,10 @@ struct SimulationConfig {
   bool capture_history;
   int history_sample_rate;
   bool compute_stats;
+  bool start_with_max_diversity;
+  bool run_until_homogeneous;
 };
 
-const int kNoAncestry = -1;
-
-struct SimulationHistory {
-  std::vector<std::vector<int>> location_to_types;
-  /// ancestry[i] == parent of i if i came from birth, otherwise it is -1.
-  std::vector<int> ancestry;
-};
 
 bool BirthDeathStep(const StepConfig&, Step*);
 bool DeathBirthStep(const StepConfig&, Step*);
@@ -86,12 +92,12 @@ bool MakeStep(const StepConfig&, Step*);
 
 void Simulate(const SimulationConfig&, Stats*, SimulationHistory*);
 
+void ComputeSimulationHistories(const SimulationConfig&, SimulationHistories*);
 void ComputeDiversityCounts(const equilibrium::SimulationConfig&, DiversityCounts*);
 
+bool IsHomogeneous(const std::vector<int>& location_to_type);
 int NumberOfTypes(const std::vector<int>&);
-
 int NumberOfUnmatchingPairs(const std::vector<int>&);
-
 int NumberOfUnmatchingLinks(const std::vector<int>&, const Graph&);
 
 bool ToString(const DiversityMeasure& measure, std::string* output);

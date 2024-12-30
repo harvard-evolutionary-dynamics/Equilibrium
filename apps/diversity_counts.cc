@@ -13,12 +13,13 @@
 
 DEFINE_int32(N, 1, "N");
 DEFINE_int32(num_steps, 0, "num-steps");
-DEFINE_int32(num_simulations, 0, "num-simulations");
+DEFINE_int32(num_simulations, 1, "num-simulations");
 DEFINE_double(birth_mutation_rate, 0, "birth-mutation-rate");
 DEFINE_double(independent_mutation_rate, 0, "independent-mutation-rate");
 DEFINE_string(graph_name, "complete", "graph-name");
 DEFINE_string(dynamic, "birth-death", "dynamic");
 DEFINE_string(tag, "", "tag");
+DEFINE_bool(start_with_max_diversity, false, "start-with-max-diversity");
 
 
 int main(int argc, char** argv) {
@@ -33,6 +34,8 @@ int main(int argc, char** argv) {
   config.num_simulations = FLAGS_num_simulations;
   config.compute_stats = true;
   config.capture_history = false;
+  config.start_with_max_diversity = FLAGS_start_with_max_diversity;
+  config.run_until_homogeneous = false;
 
   if (!GetGraph(FLAGS_graph_name, FLAGS_N, &config.graph)) {
     throw std::invalid_argument("No graph named '" + FLAGS_graph_name + "'");

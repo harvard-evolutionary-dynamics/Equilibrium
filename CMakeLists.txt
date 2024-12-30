@@ -29,6 +29,7 @@ find_package(OpenMP)
 if (NOT OpenMP_CXX_FOUND)
     message(FATAL_ERROR "OpenMP not found :(")
 endif ()
+
 # Let's nicely support folders in IDE's
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 

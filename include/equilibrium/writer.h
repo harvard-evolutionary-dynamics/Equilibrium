@@ -17,7 +17,16 @@ struct MetaData {
 
 std::string GetOutputFileName(const std::string& prefix, const std::chrono::time_point<std::chrono::system_clock>& time);
 void WriteDiversityCountsToStream(const DiversityCounts&, const SimulationConfig&, const MetaData&, std::ostream* os);
-void WriteSimulationHistoryToStream(const SimulationHistory&, const SimulationConfig&, const MetaData&, std::ostream* os);
+void WriteSimulationHistoryToStream(const SimulationHistories&, const SimulationConfig&, const MetaData&, std::ostream* os);
+void WriteTrendsToStream(
+  const std::string& graph_name,
+  const int N,
+  const double exp_sample_rate,
+  const Trends& trends,
+  const SimulationConfig& config,
+  const MetaData& metadata,
+  std::ostream* os
+);
 
 } // namespace equilibrium
 
