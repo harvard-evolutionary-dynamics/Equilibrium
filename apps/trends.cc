@@ -77,7 +77,8 @@ int main(int argc, char** argv) {
   equilibrium::Trends absorption_times;
 #pragma omp parallel for collapse(2)
   for (int trial = 0; trial < FLAGS_num_simulations; ++trial) {
-    for (const int n : ns) {
+    for (int i = 0; i < ns.size(); ++i) {
+      const int n = ns[i];
       equilibrium::Stats stats;
       equilibrium::Simulate(configs[n], &stats, nullptr);
 #pragma omp critical
